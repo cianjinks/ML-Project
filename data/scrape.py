@@ -57,8 +57,7 @@ def recurse_matches(api_key: str, region: str, start_puuid: str):
     player_match_list = get_match_ids(api_key, region, start_puuid, count=10)
     for match_id in player_match_list:
         queue.append(new_match_id)
-        
-    with rate_limiter:
+
         while len(queue) > 0:
             match_id = queue.pop(0)
 
@@ -68,14 +67,16 @@ def recurse_matches(api_key: str, region: str, start_puuid: str):
             seen_match_ids.add(match_id)
 
             # Retrieve match data and write out to file `/json/{match_id}.json`
-            match_json_data = get_match(api_key, region, match_id)
+            with rate_limiter:
+                match_json_data = get_match(api_key, region, match_id)
             write_json_to_file(match_json_data, f"{os.path.dirname(os.path.realpath(__file__))}/json/{match_id}.json")
 
             # Add players from that match to the queue
             if match_json_data["metadata"]:
                 if match_json_data["metadata"]["participants"]:
                     for player in match_json_data["metadata"]["participants"]:
-                        player_match_list = get_match_ids(api_key, region, player, count=10)
+                        with rate_limiter:
+                            player_match_list = get_match_ids(api_key, region, player, count=10)
                         for new_match_id in player_match_list:
                             queue.append(new_match_id)
 
