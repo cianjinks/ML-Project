@@ -192,7 +192,7 @@ def main():
             match_ids = get_match_ids(api_key, "europe", puuid, count=1)     
             if match_ids:
                 start_match_id = match_ids[0]
-                recurse_matches_v2(api_key, "europe", start_match_id, 20)
+                recurse_matches_v2(api_key, "europe", start_match_id, 5000)
 
 if __name__ == "__main__":
     load_dotenv()
