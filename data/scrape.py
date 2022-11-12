@@ -173,15 +173,11 @@ def main():
 
     # players in increasing order of their skill
     players = [
-        ("Sauromat", "Iron 4"),
-        ("Hungardt", "Bronze 3"),
-        ("Ebbo", "Silver 2"),
-        ("TheBardussy", "Gold 4"),
-        ("123trebor", "Platinum 4"),
-        ("Seojunny", "Diamond 1"),
-        ("Lοtuss", "Master 500"),
-        ("twitchtvELOSANTA", "Grandmaster 700"),
-        ("Agurin", "Challenger 1700"),
+        ("alz3abii", "Bronze 2"),
+        ("Lastear243", "Bronze 4"),
+        ("vReaper3415", "Iron 1"),
+        ("andijvie7", "Iron 3"),
+        ("AsierMcf00", "Gold 3")
     ]
 
     for player_name, _ in players:
