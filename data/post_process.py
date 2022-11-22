@@ -9,7 +9,7 @@ def read_file(filename: str):
     f = open(filename, "r")
     return json.load(f)
 
-def post_proces():
+def post_process():
     files = get_files("json")
 
     # stored by match_id
