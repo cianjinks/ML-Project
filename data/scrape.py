@@ -177,16 +177,20 @@ def recurse_matches_v2(api_key: str, region: str, start_match_id: str, matches_t
 
 def main():
     global total_matches_to_be_fetched
-    
+
     api_key = os.environ["RIOT_KEY"]
 
     # players in increasing order of their skill
     players = [
-        ("Rhaast", "Gold 1"),
-        ("The Old Boy", "Plat 3"),
-        ("Misquu", "Plat 1"),
-        ("Papinokush", "Diamond 3"),
-
+        ("Sköll y Hati", "P1"),
+        ("lorenz goes pro", "M 55"),
+        ("me no win sorry", "G3"),
+        ("F0R" , "S3"),
+        ("Obsess", "GM 870"),
+        ("ERROR 423", "B2"),
+        ("TeLoÉxplico", "I3"),
+        ("DonMartin", "D3"),
+        ("Nightmares", "chal 1008")
     ]
 
     match_count = 5000
