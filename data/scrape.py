@@ -151,7 +151,7 @@ def recurse_matches_v2(api_key: str, region: str, start_match_id: str, matches_t
                     for player in match_json_data["metadata"]["participants"]:
                         player_match_list = []
                         while not player_match_list:
-                            player_match_list = get_match_ids(api_key, region, player, count=2)
+                            player_match_list = get_match_ids(api_key, region, player, count=10)
                             if len(player_match_list) == 1:
                                 print(f"Player only played 1 game in Ranked!")
                                 break
@@ -173,11 +173,11 @@ def main():
 
     # players in increasing order of their skill
     players = [
-        ("alz3abii", "Bronze 2"),
-        ("Lastear243", "Bronze 4"),
-        ("vReaper3415", "Iron 1"),
-        ("andijvie7", "Iron 3"),
-        ("AsierMcf00", "Gold 3")
+        ("Rhaast", "Gold 1"),
+        ("The Old Boy", "Plat 3"),
+        ("Misquu", "Plat 1"),
+        ("Papinokush", "Diamond 3"),
+        
     ]
 
     for player_name, _ in players:
