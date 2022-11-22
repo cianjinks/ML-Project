@@ -7,6 +7,9 @@ from dotenv import load_dotenv
 
 # Retrieve a player's `puuid` given their `region`, `gameName` and `tagLine`
 
+total_matches_fetched = 0
+total_matches_to_be_fetched = -1
+
 request_window_limit_1 = []
 request_window_limit_120 = []
 
@@ -123,6 +126,8 @@ def write_json_to_file(json_data, path: str):
 # Ensures that the 100 requests per 2 minutes limit is not exceeded.
 
 def recurse_matches_v2(api_key: str, region: str, start_match_id: str, matches_to_be_fetched: int = 20):
+    global total_matches_fetched
+    global total_matches_to_be_fetched
     visited = set()
     queue = [start_match_id]
     matches_fetched = 0
@@ -143,8 +148,10 @@ def recurse_matches_v2(api_key: str, region: str, start_match_id: str, matches_t
             write_json_to_file(
                 match_json_data, f"{os.path.dirname(os.path.realpath(__file__))}/json/{current}.json")
             matches_fetched += 1
+            total_matches_fetched+=1
             print(f"Start match: {start_match_id}, match_id: {current}, "
-                    f"progress: {matches_fetched}/{matches_to_be_fetched}, queue: {len(queue)}")
+                    f"progress: {total_matches_fetched}/{total_matches_to_be_fetched}, queue: {len(queue)}, matches fetched "
+                        f"for the player: {matches_fetched}")
 
             if len(queue) < max_queue_size:
                 if "participants" in match_json_data["metadata"] and match_json_data["metadata"]["participants"]:
@@ -169,6 +176,8 @@ def recurse_matches_v2(api_key: str, region: str, start_match_id: str, matches_t
 
 
 def main():
+    global total_matches_to_be_fetched
+    
     api_key = os.environ["RIOT_KEY"]
 
     # players in increasing order of their skill
@@ -177,8 +186,11 @@ def main():
         ("The Old Boy", "Plat 3"),
         ("Misquu", "Plat 1"),
         ("Papinokush", "Diamond 3"),
-        
+
     ]
+
+    match_count = 5000
+    total_matches_to_be_fetched = match_count * len(players)
 
     for player_name, _ in players:
         print(player_name)
@@ -188,7 +200,8 @@ def main():
             match_ids = get_match_ids(api_key, "europe", puuid, count=1)     
             if match_ids:
                 start_match_id = match_ids[0]
-                recurse_matches_v2(api_key, "europe", start_match_id, 5000)
+                recurse_matches_v2(api_key, "europe",
+                                   start_match_id, match_count)
 
 if __name__ == "__main__":
     load_dotenv()
