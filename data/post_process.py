@@ -108,5 +108,5 @@ def post_process():
 
 
 if __name__ == "__main__":
-    post_proces()
+    post_process()
 
