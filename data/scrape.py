@@ -1,7 +1,6 @@
 import os
 import requests
 import json
-import time
 from dotenv import load_dotenv
 from rate_limiter import RateLimiter
 
