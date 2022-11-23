@@ -82,6 +82,10 @@ def post_process():
                         match_count * averageAssists + kills) / (match_count + 1)
                     player_data[puuid]["matchCount"] += 1
 
+                    if champion_id not in player_data[puuid]["championsPlayed"]:
+                        player_data[puuid]["championsPlayed"].append(champion_id)
+
+
                 else:
                     player_data[puuid] = {
                         "encryptedSummonerId": encrypted_summoner_id,
