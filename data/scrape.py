@@ -3,71 +3,26 @@ import requests
 import json
 import time
 from dotenv import load_dotenv
-# Put your API key in a .env file as RIOT_KEY=<your api key>
+from rate_limiter import RateLimiter
 
+# Put your API key in a .env file as RIOT_KEY=<your api key>
 # Retrieve a player's `puuid` given their `region`, `gameName` and `tagLine`
 
-total_matches_fetched = 0
-total_matches_to_be_fetched = -1
-
-request_window_limit_1 = []
-request_window_limit_120 = []
+r = RateLimiter()
 
 MAX_QUEUE_SIZE = 180
-
-def update_time_windows():
-    global request_window_limit_1
-    global request_window_limit_120
-
-    current_time = time.time()
-    last_1 = current_time -  1
-    last_120 = current_time - 120
-
-    new_request_window_limit_1 = []
-    new_request_window_limit_120 = []
-
-    for t in request_window_limit_1:
-        if t >= last_1:
-            new_request_window_limit_1.append(t)
-
-    for t in request_window_limit_120:
-        if t >=last_120:
-            new_request_window_limit_120.append(t)
-
-    request_window_limit_1 = new_request_window_limit_1
-    request_window_limit_120 = new_request_window_limit_120
-
-
-def block_execution():
-    global request_window_limit_1
-    global request_window_limit_120
-    return len(request_window_limit_120) >= 95 or len(request_window_limit_1) >= 18
-
-def append_moment():
-    global request_window_limit_1
-    global request_window_limit_120
-    current = time.time()
-    request_window_limit_1.append(current)
-    request_window_limit_120.append(current)
-    print(f"Sent a request: {current}")
-
-def rate_limit():
-    first = True
-    while block_execution():
-        update_time_windows()
-        if first:
-            print("Waiting...")
-            first = False
+total_matches_fetched = 0
+total_matches_to_be_fetched = -1
 
 def get_puuid(api_key: str, summonerName: str):
    
     url = f"https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summonerName}"
     headers = {"X-Riot-Token": api_key}
 
-    rate_limit()
+    r.rate_limit()
     response = requests.get(url, headers=headers)
+    r.append_moment()
 
-    append_moment()
     if response.ok:
         json_data = response.json()
         if json_data["puuid"]:
@@ -92,9 +47,9 @@ def get_match_ids(api_key: str, region: str, puuid: str, queue: int = 420,
     }
     headers = {"X-Riot-Token": api_key}
 
-    rate_limit()
+    r.rate_limit()
     response = requests.get(url, headers=headers, params=params)
-    append_moment()
+    r.append_moment()
     if response.ok:
         json_data = response.json()
         if json_data:
@@ -109,9 +64,9 @@ def get_match(api_key: str, region: str, match_id: str):
     url = f"https://{region}.api.riotgames.com/lol/match/v5/matches/{match_id}"
     headers = {"X-Riot-Token": api_key}
 
-    rate_limit()
+    r.rate_limit()
     response = requests.get(url, headers=headers)
-    append_moment()
+    r.append_moment()
     json_data = response.json()
     return json_data
 
