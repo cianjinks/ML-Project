@@ -18,9 +18,9 @@ def get_puuid(api_key: str, summonerName: str):
     url = f"https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summonerName}"
     headers = {"X-Riot-Token": api_key}
 
-    r.rate_limit()
+    r.rate_limit(api_key)
     response = requests.get(url, headers=headers)
-    r.append_moment()
+    r.append_moment(api_key)
 
     if response.ok:
         json_data = response.json()
@@ -46,9 +46,9 @@ def get_match_ids(api_key: str, region: str, puuid: str, queue: int = 420,
     }
     headers = {"X-Riot-Token": api_key}
 
-    r.rate_limit()
+    r.rate_limit(api_key)
     response = requests.get(url, headers=headers, params=params)
-    r.append_moment()
+    r.append_moment(api_key)
     if response.ok:
         json_data = response.json()
         if json_data:
@@ -63,9 +63,9 @@ def get_match(api_key: str, region: str, match_id: str):
     url = f"https://{region}.api.riotgames.com/lol/match/v5/matches/{match_id}"
     headers = {"X-Riot-Token": api_key}
 
-    r.rate_limit()
+    r.rate_limit(api_key)
     response = requests.get(url, headers=headers)
-    r.append_moment()
+    r.append_moment(api_key)
     json_data = response.json()
     return json_data
 
@@ -132,7 +132,8 @@ def recurse_matches_v2(api_key: str, region: str, start_match_id: str, matches_t
 def main():
     global total_matches_to_be_fetched
 
-    api_key = os.environ["RIOT_KEY"]
+    api_key = os.environ["RIOT_KEY_1"]
+    r.register_api_key(api_key)
 
     # players in increasing order of their skill
     players = [

@@ -5,20 +5,23 @@ from dotenv import load_dotenv
 from rate_limiter import RateLimiter
 
 load_dotenv()
-api_key = os.environ["RIOT_KEY"]
+api_keys = [os.environ["RIOT_KEY_1"], os.environ["RIOT_KEY_2"]]
 
 r = RateLimiter()
 
+for api_key in api_keys:
+    r.register_api_key(api_key)
+
 
 # get mastery for a player given the champion
-def fetch_mastery(encrypted_summoner_id, champion_id):
+def fetch_mastery(encrypted_summoner_id, champion_id, api_key):
     url = (f"https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/"
             f"{encrypted_summoner_id}/by-champion/{champion_id}")
     headers = {"X-Riot-Token": api_key}
 
-    r.rate_limit()
+    r.rate_limit(api_key)
     response = requests.get(url, headers=headers)
-    r.append_moment()
+    r.append_moment(api_key)
 
     stats = {"championLevel": -1, "championPoints": -1, "lastPlayTime": -1}
 
@@ -34,13 +37,13 @@ def fetch_mastery(encrypted_summoner_id, champion_id):
     return stats
 
 # get player's rank, lp, wins, losses
-def get_player_stats(encrypted_summoner_id):
+def get_player_stats(encrypted_summoner_id, api_key):
     url = f"https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/{encrypted_summoner_id}"
     headers = {"X-Riot-Token": api_key}
 
-    r.rate_limit()
+    r.rate_limit(api_key)
     response = requests.get(url, headers=headers)
-    r.append_moment()
+    r.append_moment(api_key)
     stats = {"tier": "Unknown", "rank": -1, "leaguePoints": -1, "wins": -1, "losses": -1}
 
     if response.ok:
@@ -69,16 +72,25 @@ def parse_player_data(filename):
 
     count = 0
 
+    api_key_index = 0
+
     for puuid, data in player_data.items():
         encrypted_summoner_id = data["encryptedSummonerId"]
         champion_ids = data["championsPlayed"]
 
-        player_stats = get_player_stats(encrypted_summoner_id)
+        api_key = api_keys[api_key_index]
+        print(f"Api key used: {api_key}")
+
+        api_key_index+=1
+        api_key_index%=2
+
+        player_stats = get_player_stats(encrypted_summoner_id, api_key)
 
         champion_stats = {}
 
         for champion_id in champion_ids:
-            champion_stats[champion_id] = fetch_mastery(encrypted_summoner_id, champion_id)
+            champion_stats[champion_id] = fetch_mastery(
+                encrypted_summoner_id, champion_id, api_key)
 
         extra_player_data[puuid] = {
             "stats": player_stats,
