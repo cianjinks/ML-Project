@@ -1,8 +1,13 @@
 # This script creates a baseline predictor model for the 100 dataset.
-# The baseline predictor counts the total tier of players in the game and considers the team with highest combined tier to win
+# A few baseline predictor ideas:
+    # Most frequent
+    # Team total ELO
+    # Team total champion mastery
 
 import json
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
+from sklearn.dummy import DummyClassifier
 
 MATCH_DATA_FILE = "small_dataset/match_data_100.json"
 PLAYER_DATA_FILE = "small_dataset/player_data_100.json"
@@ -23,7 +28,7 @@ def get_position_feature_offset(position: str):
         return 3 * FEATURES_PER_PLAYER
     elif position == "UTILITY":
         return 4 * FEATURES_PER_PLAYER
-    print("[ERROR] Player has invalid lane position?")
+    print(f"[ERROR] Player has invalid lane position: {position}")
     return 0
 
 def convert_tier(tier: str):
@@ -46,7 +51,7 @@ def convert_tier(tier: str):
     elif tier == "CHALLENGER":
         return 8
 
-    print(f"Player has invalid tier: {tier}")
+    print(f"[ERROR] Player has invalid tier: {tier}")
     return 0
 
 def convert_rank(rank: str):
@@ -94,25 +99,58 @@ def get_data():
             # position = player_draft["position"]
 
             match_features[(FEATURES_PER_PLAYER * index) + 0] = player_draft["championId"]
-            match_features[(FEATURES_PER_PLAYER * index) + 1] = convert_tier(extra_player_info["tier"])
-            match_features[(FEATURES_PER_PLAYER * index) + 2] = convert_rank(extra_player_info["rank"])
-            match_features[(FEATURES_PER_PLAYER * index) + 3] = extra_player_info["leaguePoints"]
-            match_features[(FEATURES_PER_PLAYER * index) + 4] = extra_player_info["wins"]
-            match_features[(FEATURES_PER_PLAYER * index) + 5] = extra_player_info["losses"]
+            match_features[(FEATURES_PER_PLAYER * index) + 1] = convert_tier(extra_player_info["stats"]["tier"])
+            match_features[(FEATURES_PER_PLAYER * index) + 2] = convert_rank(extra_player_info["stats"]["rank"])
+            match_features[(FEATURES_PER_PLAYER * index) + 3] = extra_player_info["stats"]["leaguePoints"]
+            match_features[(FEATURES_PER_PLAYER * index) + 4] = extra_player_info["stats"]["wins"]
+            match_features[(FEATURES_PER_PLAYER * index) + 5] = extra_player_info["stats"]["losses"]
             match_features[(FEATURES_PER_PLAYER * index) + 6] = player_info["averageKills"]
             match_features[(FEATURES_PER_PLAYER * index) + 7] = player_info["averageDeaths"]
             match_features[(FEATURES_PER_PLAYER * index) + 8] = player_info["averageAssists"]
-            match_features[(FEATURES_PER_PLAYER * index) + 9] = player_info["championMastery"][draft["championId"]]["championPoints"]
+            match_features[(FEATURES_PER_PLAYER * index) + 9] = extra_player_info["championMastery"][str(player_draft["championId"])]["championPoints"]
         
         features.append(match_features)
         classification.append(match["winningTeam"])
-        return features, classification
+
+    return features, classification
+
+def champion_mastery_classifier(Xtest):
+    preds = []
+    for match in Xtest:
+        blue_team_mastery = 0
+        red_team_mastery = 0
+
+        player = 0
+        while player < 5:
+            blue_team_mastery += match[(FEATURES_PER_PLAYER * player) + 9]
+            player += 1
+        
+        while player < 10:
+            red_team_mastery += match[(FEATURES_PER_PLAYER * player) + 9]
+            player += 1
+
+        if blue_team_mastery > red_team_mastery:
+            preds.append(100)
+        else:
+            preds.append(200)
+    
+    return preds
+
 
 def baseline(X, Y):
-    print("Running baseline test...")
 
     # Split the data into training and test sets with 80/20 ratio
-    Xtrain, Xtest, ytrain, ytest = train_test_split(X, Y, test_size=0.2)
+    # Xtrain, Xtest, ytrain, ytest = train_test_split(X, Y, test_size=0.2)
+
+    print("Running most frequent classifier...")
+    dummy = DummyClassifier(strategy="most_frequent")
+    dummy.fit(X, Y)
+    preds = dummy.predict(X)
+    print(classification_report(Y, preds))
+
+    print("Running total champion mastery classifier...")
+    preds2 = champion_mastery_classifier(X)
+    print(classification_report(Y, preds2))
 
 
 def main():
