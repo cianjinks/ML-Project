@@ -1,0 +1,80 @@
+{
+  "EUW1_5352249295": {
+    "gameVersion": "11.13.382.1241",
+    "puuids": [
+      "csV8uEFAuSoANGBJrtdAT9ndOlZJXg-ZjL1clOybqOcxL2p16AQyntrHdsIFeOz-poxInJfEzasnSA",
+      "EaX7uWuEFYYt-cbDGTTsy8SzdPBTHGBbbKeRZST6lce48blDs0ASpqVdWa5ij8JiyZ6HF_5onXohXw",
+      "ZcwGqdbrrdWI7pirtf8vY8Zg8dW-o1W6gQS0IEEgGxKOAOHA2kCcREjXoPvmn0pWzCDBn5piUc0fwQ",
+      "RLcNQtWkFXLFZjgJEiTwGHWBtg9Rz7M8nP6dt0GydWhWREIR5kL2HY-JYxGs6EMA-XKnUoIKru0E4A",
+      "7OLJnSnJvsM7PNmauG5pVLx9O2_phsRp8eTn0GhempR7xYW1jaOyQ74oC8a5u9repG9E8t0pFGnaLA",
+      "7UEFpyDwyo-XwyKSvnydbmfQQpCwYfeDbEm9Qb9OD6E0ESiYmFAKvt5APdUyTED_LxEiOipyRVLTgQ",
+      "vPMer_CF6_Zu-FvT7hthvf2RMuf4cXuJRtuOLYNb9Tgqr9mY1mlHUI_6S0x6iPQWYCf5Wy7WQMVwEg",
+      "8adg0REh8JUozNaQkRCioP1PrPkG4RNM21dBDYi85buyU_RmthXVf2TZypA5QHPS9w-QKyD-CgTFcA",
+      "LmontQ5n2lZ_00SSvBOwC2Z7GTUgv0yZOEMsdaHf4pba9ncWrTzgX-AyCLKnKwlThl9Ly_H_kOXRbA",
+      "IxY0NGAuLZ6K640HOzP6LmF5nsEky0C2OVFlcuslyE-ZILORnd-4BHWSFtzhlVQx-ckA_GM9h5_aXQ"
+    ],
+    "draft": [
+      {
+        "puuid": "csV8uEFAuSoANGBJrtdAT9ndOlZJXg-ZjL1clOybqOcxL2p16AQyntrHdsIFeOz-poxInJfEzasnSA",
+        "championId": 39,
+        "position": "TOP",
+        "teamId": 100
+      },
+      {
+        "puuid": "EaX7uWuEFYYt-cbDGTTsy8SzdPBTHGBbbKeRZST6lce48blDs0ASpqVdWa5ij8JiyZ6HF_5onXohXw",
+        "championId": 24,
+        "position": "JUNGLE",
+        "teamId": 100
+      },
+      {
+        "puuid": "ZcwGqdbrrdWI7pirtf8vY8Zg8dW-o1W6gQS0IEEgGxKOAOHA2kCcREjXoPvmn0pWzCDBn5piUc0fwQ",
+        "championId": 157,
+        "position": "MIDDLE",
+        "teamId": 100
+      },
+      {
+        "puuid": "RLcNQtWkFXLFZjgJEiTwGHWBtg9Rz7M8nP6dt0GydWhWREIR5kL2HY-JYxGs6EMA-XKnUoIKru0E4A",
+        "championId": 81,
+        "position": "BOTTOM",
+        "teamId": 100
+      },
+      {
+        "puuid": "7OLJnSnJvsM7PNmauG5pVLx9O2_phsRp8eTn0GhempR7xYW1jaOyQ74oC8a5u9repG9E8t0pFGnaLA",
+        "championId": 89,
+        "position": "UTILITY",
+        "teamId": 100
+      },
+      {
+        "puuid": "7UEFpyDwyo-XwyKSvnydbmfQQpCwYfeDbEm9Qb9OD6E0ESiYmFAKvt5APdUyTED_LxEiOipyRVLTgQ",
+        "championId": 875,
+        "position": "TOP",
+        "teamId": 200
+      },
+      {
+        "puuid": "vPMer_CF6_Zu-FvT7hthvf2RMuf4cXuJRtuOLYNb9Tgqr9mY1mlHUI_6S0x6iPQWYCf5Wy7WQMVwEg",
+        "championId": 141,
+        "position": "JUNGLE",
+        "teamId": 200
+      },
+      {
+        "puuid": "8adg0REh8JUozNaQkRCioP1PrPkG4RNM21dBDYi85buyU_RmthXVf2TZypA5QHPS9w-QKyD-CgTFcA",
+        "championId": 245,
+        "position": "MIDDLE",
+        "teamId": 200
+      },
+      {
+        "puuid": "LmontQ5n2lZ_00SSvBOwC2Z7GTUgv0yZOEMsdaHf4pba9ncWrTzgX-AyCLKnKwlThl9Ly_H_kOXRbA",
+        "championId": 235,
+        "position": "BOTTOM",
+        "teamId": 200
+      },
+      {
+        "puuid": "IxY0NGAuLZ6K640HOzP6LmF5nsEky0C2OVFlcuslyE-ZILORnd-4BHWSFtzhlVQx-ckA_GM9h5_aXQ",
+        "championId": 412,
+        "position": "UTILITY",
+        "teamId": 200
+      }
+    ],
+    "winningTeam": 100
+  }
+}
