@@ -1,5 +1,5 @@
 #!/bin/sh
-sudo apt install git
+sudo apt -y install git
 sudo apt install gh
 sudo apt install python3.9
 sudo apt-get -y install python3-pip
