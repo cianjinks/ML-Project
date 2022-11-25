@@ -99,4 +99,4 @@ def test():
     print(fetch_mastery(encrypted_summoner_id, champion_id))
 
 if __name__ == "__main__":
-    parse_player_data("player_data_example.json")
+    parse_player_data("player_data.json")
