@@ -1,4 +1,4 @@
-# This script creates a baseline predictor model for the 100 dataset.
+# This script creates a baseline predictor model and logistc regression model for the 100 dataset.
 # A few baseline predictor ideas:
     # Most frequent
     # Team total ELO
@@ -8,6 +8,7 @@ import json
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 from sklearn.dummy import DummyClassifier
+from sklearn.linear_model import LogisticRegression
 
 MATCH_DATA_FILE = "small_dataset/match_data_100.json"
 PLAYER_DATA_FILE = "small_dataset/player_data_100.json"
@@ -63,6 +64,9 @@ def convert_rank(rank: str):
         return 3
     elif rank == "IV":
         return 4
+    
+    print(f"[ERROR] Player has invalid rank: {rank}")
+    return 0
 
 def get_json_data(filename: str):
     json_data = {}
@@ -138,10 +142,6 @@ def champion_mastery_classifier(Xtest):
 
 
 def baseline(X, Y):
-
-    # Split the data into training and test sets with 80/20 ratio
-    # Xtrain, Xtest, ytrain, ytest = train_test_split(X, Y, test_size=0.2)
-
     print("Running most frequent classifier...")
     dummy = DummyClassifier(strategy="most_frequent")
     dummy.fit(X, Y)
@@ -152,10 +152,20 @@ def baseline(X, Y):
     preds2 = champion_mastery_classifier(X)
     print(classification_report(Y, preds2))
 
+def logistic_regiression(X, Y):
+    # Split the data into training and test sets with 80/20 ratio
+    Xtrain, Xtest, ytrain, ytest = train_test_split(X, Y, test_size=0.2)
+    
+    print("Running logistic regression classifier...")
+    model = LogisticRegression(solver="liblinear", penalty="l1", C=0.1, max_iter=10000)
+    model.fit(Xtrain, ytrain)
+    preds = model.predict(Xtest)
+    print(classification_report(ytest, preds))
 
 def main():
     X, Y = get_data()
     baseline(X, Y)
+    logistic_regiression(X, Y)
 
 if __name__ == "__main__":
     main()
