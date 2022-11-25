@@ -66,12 +66,13 @@ def get_json_data(filename: str):
         f.close()
     return json_data
 
-def get_features():
+def get_data():
     match_data = get_json_data(MATCH_DATA_FILE)
     player_data = get_json_data(PLAYER_DATA_FILE)
     extra_player_data = get_json_data(EXTRA_PLAYER_DATA_FILE)
 
     features = []
+    classification = []
 
     for match_id, match in match_data.items():
         # Order of players: B Top, Jungle, Mid, ADC, Supp, R Top, Jungle, Mid, ADC, Supp
@@ -83,14 +84,14 @@ def get_features():
         for d in match["draft"]:
             draft[d["puuid"]] = d
 
+        # TODO: This will be incorrect if players swapped roles!!!!!
         for index, player in enumerate(match["puuids"]):
 
             player_draft = draft[player]
             player_info = player_data[player]
-            extra_player_info = extra_player_data[player_info["encryptedSummonerId"]]
+            extra_player_info = extra_player_data[player]
             
-            position = player_draft["position"]
-            feature_index += get_position_feature_offset(position)
+            # position = player_draft["position"]
 
             match_features[(FEATURES_PER_PLAYER * index) + 0] = player_draft["championId"]
             match_features[(FEATURES_PER_PLAYER * index) + 1] = convert_tier(extra_player_info["tier"])
@@ -104,14 +105,19 @@ def get_features():
             match_features[(FEATURES_PER_PLAYER * index) + 9] = player_info["championMastery"][draft["championId"]]["championPoints"]
         
         features.append(match_features)
-        return features
+        classification.append(match["winningTeam"])
+        return features, classification
 
-def baseline(features):
+def baseline(X, Y):
     print("Running baseline test...")
 
+    # Split the data into training and test sets with 80/20 ratio
+    Xtrain, Xtest, ytrain, ytest = train_test_split(X, Y, test_size=0.2)
+
+
 def main():
-    features = get_features()
-    baseline(features)
+    X, Y = get_data()
+    baseline(X, Y)
 
 if __name__ == "__main__":
     main()
