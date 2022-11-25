@@ -1,17 +1,71 @@
 import os
+import sys
 import requests
 import json
+import time
 from dotenv import load_dotenv
 from rate_limiter import RateLimiter
 
 # Put your API key in a .env file as RIOT_KEY=<your api key>
 # Retrieve a player's `puuid` given their `region`, `gameName` and `tagLine`
 
+start_time = time.time()
+
+SECONDS_IN_20_HOURS = 72000
+
 r = RateLimiter()
 
 MAX_QUEUE_SIZE = 180
 total_matches_fetched = 0
 total_matches_to_be_fetched = -1
+
+# get mastery for a player given the champion
+def fetch_mastery(encrypted_summoner_id, champion_id, api_key):
+    url = (f"https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/"
+           f"{encrypted_summoner_id}/by-champion/{champion_id}")
+    headers = {"X-Riot-Token": api_key}
+
+    r.rate_limit(api_key)
+    response = requests.get(url, headers=headers)
+    r.append_moment(api_key)
+
+    stats = {"championLevel": -1, "championPoints": -1, "lastPlayTime": -1}
+
+    if response.ok:
+        json_data = response.json()
+        stats["championLevel"] = json_data["championLevel"]
+        stats["championPoints"] = json_data["championPoints"]
+        stats["lastPlayTime"] = json_data["lastPlayTime"]
+
+    else:
+        print(response.text)
+
+    return stats
+
+# get player's rank, lp, wins, losses
+def get_player_stats(encrypted_summoner_id, api_key):
+    url = f"https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/{encrypted_summoner_id}"
+    headers = {"X-Riot-Token": api_key}
+
+    r.rate_limit(api_key)
+    response = requests.get(url, headers=headers)
+    r.append_moment(api_key)
+    stats = {"tier": "Unknown", "rank": -1,
+             "leaguePoints": -1, "wins": -1, "losses": -1}
+
+    if response.ok:
+        json_data = response.json()
+        for queue_info in json_data:
+            if queue_info["queueType"] == "RANKED_SOLO_5x5":
+                stats["tier"] = queue_info["tier"]
+                stats["rank"] = queue_info["rank"]
+                stats["leaguePoints"] = queue_info["leaguePoints"]
+                stats["wins"] = queue_info["wins"]
+                stats["losses"] = queue_info["losses"]
+    else:
+        print(response.text)
+
+    return stats
 
 def get_puuid(api_key: str, summonerName: str):
    
@@ -34,8 +88,6 @@ def get_puuid(api_key: str, summonerName: str):
 # The default parameters will return the most recent 20 solo/duo ranked matches.
 # A list of queue types is found here: https://static.developer.riotgames.com/docs/lol/queues.json
 # 420 is the id for solo/duo ranked. If we left it blank we would also get flex ranked games.
-
-
 def get_match_ids(api_key: str, region: str, puuid: str, queue: int = 420,
                   match_type: str = "ranked", count: int = 20):
     url = f"https://{region}.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids"
@@ -57,8 +109,6 @@ def get_match_ids(api_key: str, region: str, puuid: str, queue: int = 420,
         return []
 
 # Get json data about a given match `match_id` for a given `region`
-
-
 def get_match(api_key: str, region: str, match_id: str):
     url = f"https://{region}.api.riotgames.com/lol/match/v5/matches/{match_id}"
     headers = {"X-Riot-Token": api_key}
@@ -67,6 +117,27 @@ def get_match(api_key: str, region: str, match_id: str):
     response = requests.get(url, headers=headers)
     r.append_moment(api_key)
     json_data = response.json()
+
+    participants_data = {}
+    
+    for participant in json_data["info"]["participants"]:
+        puuid = participant["puuid"]
+        champion_id = participant["championId"]
+        encrypted_summoner_id = participant["summonerId"]
+
+        stats = get_player_stats(encrypted_summoner_id, api_key)
+        mastery = fetch_mastery(
+            encrypted_summoner_id, champion_id, api_key)
+
+        participants_data[puuid] = {
+            "stats": stats,
+            "mastery": mastery,
+            "championId": champion_id,
+            "encryptedSummonerId": encrypted_summoner_id
+        }
+
+    json_data["customParticipantData"] = participants_data
+
     return json_data
 
 
@@ -78,10 +149,11 @@ def write_json_to_file(json_data, path: str):
 # BFS search through the players in those matches most recent 10.
 # Maintains a set of match IDs to avoid duplicate match traversal.
 # Ensures that the 100 requests per 2 minutes limit is not exceeded.
-
 def recurse_matches_v2(api_key: str, region: str, start_match_id: str, matches_to_be_fetched: int = 20):
     global total_matches_fetched
     global total_matches_to_be_fetched
+    global start_time
+
     visited = set()
     queue = [start_match_id]
     matches_fetched = 0
@@ -89,6 +161,11 @@ def recurse_matches_v2(api_key: str, region: str, start_match_id: str, matches_t
     max_queue_size = min(matches_to_be_fetched, MAX_QUEUE_SIZE)
 
     while len(queue) > 0 and matches_fetched < matches_to_be_fetched:
+        current_time = time.time()
+
+        if current_time - start_time > SECONDS_IN_20_HOURS:
+            break
+
         current = queue.pop(0)
 
         if current in visited:
@@ -128,19 +205,15 @@ def recurse_matches_v2(api_key: str, region: str, start_match_id: str, matches_t
             print("No metadata in response, trying again!")
             queue.append(current)
 
-
 def main():
+
     global total_matches_to_be_fetched
 
-    api_key = os.environ["RIOT_KEY_1"]
+    api_key = os.environ["RIOT_KEY"]
     r.register_api_key(api_key)
 
     # players in increasing order of their skill
     players = [
-        ("Sköll y Hati", "P1"),
-        ("lorenz goes pro", "M 55"),
-        ("me no win sorry", "G3"),
-        ("F0R" , "S3"),
         ("Obsess", "GM 870"),
         ("ERROR 423", "B2"),
         ("TeLoÉxplico", "I3"),
@@ -164,4 +237,5 @@ def main():
 
 if __name__ == "__main__":
     load_dotenv()
-    main()
+    with open('logs.txt', 'w+') as sys.stdout:
+        main()
