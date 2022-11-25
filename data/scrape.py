@@ -119,7 +119,7 @@ def get_match(api_key: str, region: str, match_id: str):
     json_data = response.json()
 
     participants_data = {}
-    
+
     for participant in json_data["info"]["participants"]:
         puuid = participant["puuid"]
         champion_id = participant["championId"]
@@ -237,5 +237,4 @@ def main():
 
 if __name__ == "__main__":
     load_dotenv()
-    with open('logs.txt', 'w+') as sys.stdout:
-        main()
+    main()
