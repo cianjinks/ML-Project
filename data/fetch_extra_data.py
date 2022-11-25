@@ -82,7 +82,7 @@ def parse_player_data(filename):
         print(f"Api key used: {api_key}")
 
         api_key_index+=1
-        api_key_index%=2
+        api_key_index = api_key_index % len(api_keys)
 
         player_stats = get_player_stats(encrypted_summoner_id, api_key)
 
