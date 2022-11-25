@@ -1,4 +1,5 @@
 import os
+import logging
 import sys
 import requests
 import json
@@ -8,6 +9,10 @@ from rate_limiter import RateLimiter
 
 # Put your API key in a .env file as RIOT_KEY=<your api key>
 # Retrieve a player's `puuid` given their `region`, `gameName` and `tagLine`
+
+logging.basicConfig(filename='results.log',
+                    encoding='utf-8', level=logging.INFO)
+logging.info("Starting logging")
 
 start_time = time.time()
 
@@ -38,7 +43,7 @@ def fetch_mastery(encrypted_summoner_id, champion_id, api_key):
         stats["lastPlayTime"] = json_data["lastPlayTime"]
 
     else:
-        print(response.text)
+        logging.info(response.text)
 
     return stats
 
@@ -63,7 +68,7 @@ def get_player_stats(encrypted_summoner_id, api_key):
                 stats["wins"] = queue_info["wins"]
                 stats["losses"] = queue_info["losses"]
     else:
-        print(response.text)
+        logging.info(response.text)
 
     return stats
 
@@ -81,7 +86,7 @@ def get_puuid(api_key: str, summonerName: str):
         if json_data["puuid"]:
             return json_data["puuid"]
     else:
-        print(response.text)
+        logging.info(response.text)
         return ""
 
 # Retrieve a list of match IDs for a given player `puuid`.
@@ -169,7 +174,7 @@ def recurse_matches_v2(api_key: str, region: str, start_match_id: str, matches_t
         current = queue.pop(0)
 
         if current in visited:
-            print(f"Already visited: {current}, skipping!")
+            logging.info(f"Already visited: {current}, skipping!")
             continue
         
         visited.add(current)
@@ -180,7 +185,7 @@ def recurse_matches_v2(api_key: str, region: str, start_match_id: str, matches_t
                 match_json_data, f"{os.path.dirname(os.path.realpath(__file__))}/json/{current}.json")
             matches_fetched += 1
             total_matches_fetched+=1
-            print(f"Start match: {start_match_id}, match_id: {current}, "
+            logging.info(f"Start match: {start_match_id}, match_id: {current}, "
                     f"progress: {total_matches_fetched}/{total_matches_to_be_fetched}, queue: {len(queue)}, matches fetched "
                         f"for the player: {matches_fetched}")
 
@@ -191,18 +196,18 @@ def recurse_matches_v2(api_key: str, region: str, start_match_id: str, matches_t
                         while not player_match_list:
                             player_match_list = get_match_ids(api_key, region, player, count=10)
                             if len(player_match_list) == 1:
-                                print(f"Player only played 1 game in Ranked!")
+                                logging.info(f"Player only played 1 game in Ranked!")
                                 break
 
                             if player_match_list:
                                 for new_match_id in player_match_list:
                                     queue.append(new_match_id)
                             else:
-                                print(f"Player match list is empty: {player}!")
+                                logging.info(f"Player match list is empty: {player}!")
                 else:
-                    print("No participants in response!")
+                    logging.info("No participants in response!")
         else:
-            print("No metadata in response, trying again!")
+            logging.info("No metadata in response, trying again!")
             queue.append(current)
 
 def main():
@@ -225,7 +230,7 @@ def main():
     total_matches_to_be_fetched = match_count * len(players)
 
     for player_name, _ in players:
-        print(player_name)
+        logging.info(player_name)
         puuid = get_puuid(api_key, player_name)
 
         if puuid:

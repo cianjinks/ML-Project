@@ -1,4 +1,5 @@
 import time
+import logging
 
 class RateLimiter:
 
@@ -38,7 +39,7 @@ class RateLimiter:
         current = time.time()
         self.request_window_limit_1[api_key].append(current)
         self.request_window_limit_120[api_key].append(current)
-        print(f"Sent a request: {current}")
+        logging.info(f"Sent a request: {current}")
 
 
     def rate_limit(self, api_key):
@@ -46,5 +47,5 @@ class RateLimiter:
         while self.block_execution(api_key):
             self.update_time_windows(api_key)
             if first:
-                print("Waiting...")
+                logging.info("Waiting...")
                 first = False
