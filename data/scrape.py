@@ -218,27 +218,20 @@ def main():
     r.register_api_key(api_key)
 
     # players in increasing order of their skill
-    players = [
-        ("Obsess", "GM 870"),
-        ("ERROR 423", "B2"),
-        ("TeLoÉxplico", "I3"),
-        ("DonMartin", "D3"),
-        ("Nightmares", "chal 1008")
-    ]
+    player_name = str(sys.argv[1])
 
     match_count = 5000
-    total_matches_to_be_fetched = match_count * len(players)
+    total_matches_to_be_fetched = match_count * 1 
 
-    for player_name, _ in players:
-        logging.info(player_name)
-        puuid = get_puuid(api_key, player_name)
+    logging.info(player_name)
+    puuid = get_puuid(api_key, player_name)
 
-        if puuid:
-            match_ids = get_match_ids(api_key, "europe", puuid, count=1)     
-            if match_ids:
-                start_match_id = match_ids[0]
-                recurse_matches_v2(api_key, "europe",
-                                   start_match_id, match_count)
+    if puuid:
+        match_ids = get_match_ids(api_key, "europe", puuid, count=1)     
+        if match_ids:
+            start_match_id = match_ids[0]
+            recurse_matches_v2(api_key, "europe",
+                                start_match_id, match_count)
 
 if __name__ == "__main__":
     load_dotenv()
