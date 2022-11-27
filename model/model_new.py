@@ -76,22 +76,23 @@ def get_player_offset(team_id: int, team_position: str):
 
     return offset
 
-
 FEATURES_PER_PLAYER = 10
 def get_data(folder: str, match_count: int = -1):
     features = []
     classification = []
 
     matches = get_files(folder[:-1])
+    num_matches = len(matches)
+    print(f"Found {num_matches} matches. Running model on {'all matches' if match_count == -1 else f'{match_count} matches'}")
     if match_count != -1:
-        if len(matches) > match_count:
+        if num_matches > match_count:
             matches = matches[:match_count]
 
     for match in matches:
         match_json = read_file(folder + match)
 
         # Order of players: B Top, Jungle, Mid, ADC, Supp, R Top, Jungle, Mid, ADC, Supp
-        # Order of features per player: Champion, Tier, Rank, LP, Winrate, Average Kills, Average Deaths, Champion Mastery
+        # Order of features per player: Champion, Tier, Rank, LP, Wins, Losses, Average Kills, Average Deaths, Average Assists, Champion Mastery
         match_features = [None] * 10 * FEATURES_PER_PLAYER # 10 players * 10 features
 
         winning_team = 100
@@ -116,9 +117,11 @@ def get_data(folder: str, match_count: int = -1):
                 player_lp = player_stats["leaguePoints"]
                 player_wins = player_stats["wins"]
                 player_losses = player_stats["losses"]
+                # TODO
                 player_average_kills = 0
                 player_average_deaths = 0
                 player_average_assists = 0
+                # ----------
                 player_champion_mastery = player_mastery["championPoints"]
                 player_win = player["win"]
 
@@ -182,7 +185,7 @@ def baseline(X, Y):
     preds2 = champion_mastery_classifier(X)
     print(classification_report(Y, preds2))
 
-def logistic_regiression(X, Y):
+def logistic_regression(X, Y):
     # Split the data into training and test sets with 80/20 ratio
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, Y, test_size=0.2)
 
@@ -192,10 +195,24 @@ def logistic_regiression(X, Y):
     preds = model.predict(Xtest)
     print(classification_report(ytest, preds))
 
+    print("Logistic Regression Coefficients:")
+    coef_meaning = ["Champion", "Tier", "Rank", "LP", "Wins", "Losses", "Average Kills", "Average Deaths", "Average Assists", "Champion Mastery"]
+    coef = model.coef_
+    c = 0
+    i = 0
+    while c < len(coef[0]):
+        player_coef = coef[0][c:c+10]
+        print("")
+        print(f"Player {i}:")
+        for coef_index, pc in enumerate(player_coef):
+            print(f"{coef_meaning[coef_index]} Weight: {pc}")
+        i += 1
+        c += 10
+
 def main():
-    X, Y = get_data("data/json/", 100)
+    X, Y = get_data("data/json/")
     baseline(X, Y)
-    logistic_regiression(X, Y)
+    logistic_regression(X, Y)
 
 if __name__ == "__main__":
     main()
