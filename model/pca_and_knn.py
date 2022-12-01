@@ -20,6 +20,9 @@ def pca(X, Y):
     Xtrain = pca.transform(Xtrain)
     Xtest = pca.transform(Xtest)
 
-    model = KNeighborsClassifier(n_neighbors=7,weights="uniform").fit(Xtrain, ytrain)
-    ypred = model.predict(Xtest)
-    print(classification_report(ytest, ypred))
+    n_neighbors = 134
+    for n in range(1, n_neighbors):
+        model = KNeighborsClassifier(n,weights="uniform").fit(Xtrain, ytrain)
+        ypred = model.predict(Xtest)
+        print(f"the value of n = {n}")
+        print(classification_report(ytest, ypred))
