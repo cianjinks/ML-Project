@@ -27,7 +27,7 @@ def print_coefficients(model):
 
 
 def logistic_regression(X, y, c_target, show_plots=False,
-                            c_range=[0.001, 0.01, 0.1, 1, 10, 100]):
+                            c_range=[0.00001, 0.0001, 0.001, 0.01, 0.1, 1]):
     X = np.array(X)
     y = np.array(y)
 
@@ -48,24 +48,27 @@ def logistic_regression(X, y, c_target, show_plots=False,
 
             ypred = model.predict(X_test)
 
-            if c == c_target and show_plots and first:
+            if show_plots and first:
                 first = False  # prevent from showing plots for all 5 k-fold models
                 print(
                     f"Confusion matrix:\n{confusion_matrix(y_test, ypred)}")
                 fpr, tpr, _ = roc_curve(
                     y_test, model.decision_function(X_test), pos_label=200)
-                plt.plot(fpr, tpr, label="Logistic regression classifier ROC")
+                plt.plot(fpr, tpr, label=f"Logistic regression classifier ROC, C={c}")
+                plt.xlabel('False positive rate')
+                plt.ylabel('True positive rate')
                 print(classification_report(y_test, ypred))
                 print_coefficients(model)
 
                 plt.legend()
-                plt.show()
 
             f1_s.append(f1_score(y_test, ypred, pos_label=200))
 
         mean_f1.append(np.array(f1_s).mean())
         std_f1.append(np.array(f1_s).std())
-       
+
+    plt.show()
+
     plt.errorbar(c_range, mean_f1, yerr=std_f1,
                  linewidth=2, color='b', ecolor='r')
 

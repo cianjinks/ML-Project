@@ -23,6 +23,21 @@ def pca_and_knn(X, y, k_target):
     scaler.fit(X)
     X = scaler.transform(X)
 
+    pca = PCA(0.95)
+    pca.fit(X)
+
+    plt.plot(range(1, len(pca.explained_variance_ratio_) + 1),
+             pca.explained_variance_ratio_, label="Explained variance ratio")
+    plt.xlabel('Number of principal components')
+    plt.ylabel('Explained variance')
+    plt.show()
+
+    pca = PCA(6)
+    pca.fit(X)
+
+    X = pca.transform(X)
+
+
     k_range = range(1, n_neighbors)
     kf = KFold(n_splits=5, shuffle=True, random_state=12345)
 
@@ -37,12 +52,6 @@ def pca_and_knn(X, y, k_target):
             Xtrain, Xtest = X[train_index], X[test_index]
             ytrain, ytest = y[train_index], y[test_index]
 
-            pca = PCA(0.8)
-            pca.fit(Xtrain)
-
-            Xtrain = pca.transform(Xtrain)
-            Xtest = pca.transform(Xtest)
-
             model = KNeighborsClassifier(n, weights="uniform").fit(Xtrain, ytrain)
             ypred = model.predict(Xtest)
             f1_scores.append(f1_score(ytest, ypred, pos_label=200))
@@ -56,7 +65,8 @@ def pca_and_knn(X, y, k_target):
                 fpr, tpr, _ = roc_curve(
                     ytest, model.predict_proba(Xtest)[:, 1], pos_label=200)
                 plt.plot(fpr, tpr, label="kNN classifier ROC")
-
+                plt.xlabel('False positive rate')
+                plt.ylabel('True positive rate')
                 plt.legend()
                 plt.show()
 
@@ -70,14 +80,14 @@ def pca_and_knn(X, y, k_target):
     plt.errorbar(k_range, mean_f1, yerr=std_f1,
                  linewidth=2, color='b', ecolor='r')
 
-    plt.xlabel('k (number of neibourghs)')
+    plt.xlabel('k (number of neighbours)')
     plt.ylabel('mean_f1')
     plt.legend(loc="lower left", prop={'size': 6})
     plt.show()
 
 def main():
     features, classification = get_data("data/json/", 20840)
-    pca_and_knn(features, classification, 125)
+    pca_and_knn(features, classification, 53)
 
 if __name__ == "__main__":
     main()
