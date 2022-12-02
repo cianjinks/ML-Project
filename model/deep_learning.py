@@ -151,8 +151,8 @@ def train_model(X, y, pretrained):
     print(confusion_matrix(ytest, y_pred))
 
 if __name__ == "__main__":
-    features, classification = get_data("data/json/", 20840)
-    train_model(features, classification, True)
-    # model = create_custom_model()
-    # plot_model(model, to_file='model_plot.png',
-    #          show_shapes=True, show_layer_names=True)
+    # features, classification = get_data("data/json/", 20840)
+    # train_model(features, classification, True)
+    model = create_custom_model()
+    plot_model(model, to_file='model_plot.pdf',
+             show_shapes=True, show_layer_names=True)
