@@ -18,6 +18,11 @@ def pca_and_knn(X, y, k_target):
     y = np.array(y)
     n_neighbors = int(math.sqrt(20840)) + 1
 
+    # perform pca dimensionality reduction
+    scaler = StandardScaler()
+    scaler.fit(X)
+    X = scaler.transform(X)
+
     k_range = range(1, n_neighbors)
     kf = KFold(n_splits=5, shuffle=True, random_state=12345)
 
@@ -31,12 +36,6 @@ def pca_and_knn(X, y, k_target):
         for train_index, test_index in kf.split(X):
             Xtrain, Xtest = X[train_index], X[test_index]
             ytrain, ytest = y[train_index], y[test_index]
-
-            # perform pca dimensionality reduction
-            scaler = StandardScaler()
-            scaler.fit(Xtrain)
-            Xtrain = scaler.transform(Xtrain)
-            Xtest = scaler.transform(Xtest)
 
             pca = PCA(0.8)
             pca.fit(Xtrain)
